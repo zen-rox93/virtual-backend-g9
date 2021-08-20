@@ -59,18 +59,48 @@ alumnos("Eduardo", "Siannet", "Pablo", "Fernando", "Rick", "Jhonathan")
 def tareas(nombre, apellido , *args):
     print("OK")
 
-tareas("Eduardo", apellido="martinez" "1", "2", 3)
+# tareas("Eduardo", apellido="martinez" "1", "2", 3)
 
 # en la funcion alumnos_notas se recibira una cantidad N de alumnos en la cual se debe indicar cuantos aprobaron y cauntos desaprobaron siendo la nota minima 11
 
-def alumnos_notas():
+def alumnos_notas(*args):
     # todo: implementar logica
-    pass
+    aprobados = 0
+    desaprobados = 0
+    for alumno in args:
+        if alumno['promedio'] > 10:
+            aprobados += 1
+        else:
+            desaprobados += 1
+    print(
+        f"Hay {aprobados} alumnos aprobados y {desaprobados} alumnos desaprobados")
+    
 
-alumnos_notas({
-    "nombre":"Raul","promedio": 17,
-    "nombre":"Roxana","promedio": 20,
-    "nombre":"Alfonso","promedio": 10,
-    "nombre":"Pedro","promedio": 8,
-    "nombre":"Katherine","promedio": 16,
-})
+alumnos_notas(
+    {"nombre":"Raul","promedio": 17},
+    {"nombre":"Roxana","promedio": 20},
+    {"nombre":"Alfonso","promedio": 10},
+    {"nombre":"Pedro","promedio": 8},
+    {"nombre":"Katherine","promedio": 16}
+)
+
+
+# keyword arguments > es muy similar a los *args solo con la diferencia que los kwargs usan el nombre del parametro (nombre="Eduardo")
+def indeterminada(**kwargs):
+    print(kwargs)
+
+
+indeterminada(nombre="eduardo", apellido="de rivero", nacionalidad="Peruano")
+indeterminada(edad=50, estatura=2.10)
+
+def variada(*args, **kwargs):
+    print(args)
+    print(kwargs)
+
+variada(10, "Eduardo", {"est_civil", "Viudo"},
+        mascota="Firulais", raza="Bulldog")
+
+def sumatoria(num1, num2):
+    return num1+num2
+
+rpta = sumatoria(10,5)
