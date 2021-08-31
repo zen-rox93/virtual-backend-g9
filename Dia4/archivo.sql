@@ -1,3 +1,0 @@
-1
-INSERT INTO PERSONALES (IDENTIFICADOR, NOMBRE, APELLIDO, DEPARTAMENTO_ID, SUPERVISOR_ID) VALUES
-                                    ('7e71f988-74a5-4698-96bc-c7489dc15584', 'Kimberly', 'Jordan', 1, null);
