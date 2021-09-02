@@ -4,8 +4,9 @@ from models.ingrediente import IngredienteModel
 from models.receta import RecetaModel
 from models.preparacion import PreparacionModel
 from models.recetas_ingredientes import RecetaIngredienteModel
+from models.log import LogModel
 
-from controllers.ingrediente import IngredientesController
+from controllers.ingrediente import IngredientesController, IngredienteController
 from flask_restful import Api
 from os import environ
 from dotenv import load_dotenv
@@ -22,6 +23,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 base_de_datos.init_app(app)
 
+# eliminara todas las tablas registradas en nuestro proyecto
+# base_de_datos.drop_all(app=app)
+
 # creara las tablas aun no mapeadas y si todo esta bien no deolvera nada
 base_de_datos.create_all(app=app)
 
@@ -32,7 +36,8 @@ def initial_controller():
     }
 
 # Zona de enrutamiento
-api.add_resource(IngredientesController, '/ingredientes')
+api.add_resource(IngredientesController, '/ingredientes',)
+api.add_resource(IngredienteController, '/ingrediente/<int:id>')
 
 if __name__ == '__main__':
     app.run(debug=True)

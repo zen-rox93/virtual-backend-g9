@@ -6,8 +6,12 @@ class IngredienteModel(base_de_datos.Model):
     __tablename__ = 'ingredientes'
 
     #id int primary key not null unique auto_increment,
-    IngredienteId = Column(name='id', type_=types.Integer, primary_key=True, 
+    ingredienteId = Column(name='id', type_=types.Integer, primary_key=True, 
                             unique=True, autoincrement=True, nullable=False)
 
-    ingredienteNombre = Column(name='nombre', type_=types.String(length=45))
+    ingredienteNombre = Column(name='nombre', type_=types.String(
+        length=45), nullable=False, unique=True)
+
+    def __str__(self):
+        return 'El ingrediente es: %s' % self.ingredienteNombre
 
