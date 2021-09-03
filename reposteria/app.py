@@ -6,7 +6,9 @@ from models.preparacion import PreparacionModel
 from models.recetas_ingredientes import RecetaIngredienteModel
 from models.log import LogModel
 
-from controllers.ingrediente import IngredientesController, IngredienteController
+from controllers.ingrediente import (IngredientesController, 
+                                    IngredienteController,
+                                    FiltroIngredientesController)
 from flask_restful import Api
 from os import environ
 from dotenv import load_dotenv
@@ -38,6 +40,7 @@ def initial_controller():
 # Zona de enrutamiento
 api.add_resource(IngredientesController, '/ingredientes',)
 api.add_resource(IngredienteController, '/ingrediente/<int:id>')
+api.add_resource(FiltroIngredientesController, '/buscar_ingrediente')
 
 if __name__ == '__main__':
     app.run(debug=True)
