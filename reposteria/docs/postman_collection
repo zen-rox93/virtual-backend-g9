@@ -1,0 +1,325 @@
+{
+	"info": {
+		"_postman_id": "6807c48a-455f-496d-97d1-39260e4d0270",
+		"name": "Reposteria Flask",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ingredientes",
+			"item": [
+				{
+					"name": "/ingredientes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\":\"laurel\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/ingredientes",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"ingredientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/ingredientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/ingredientes",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"ingredientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/ingrediente/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/ingrediente/1",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"ingrediente",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/ingredientes/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Jalapeño\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/ingrediente/1",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"ingrediente",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/ingrediente/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/ingrediente/1",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"ingrediente",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/buscar_ingrediente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/buscar_ingrediente?nombre=a",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"buscar_ingrediente"
+							],
+							"query": [
+								{
+									"key": "nombre",
+									"value": "a"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "recetas",
+			"item": [
+				{
+					"name": "/recetas",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\" : \"Palta Rellena\",\r\n    \"porcion\": \"personal\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/recetas",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"recetas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{url_local}}/recetas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/recetas?page=1&perPage=1",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"recetas"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "perPage",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/receta/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/receta/400",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"receta",
+								"400"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "recetas_ingredientes",
+			"item": [
+				{
+					"name": "/recetas_ingredientes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"receta_id\": 400,\r\n    \"ingredientes_id\": [\r\n        {\r\n            \"ingrediente_id\": 1,\r\n            \"cantidad\": \"40gr.\"\r\n        },\r\n        {\r\n            \"ingrediente_id\": 2,\r\n            \"cantidad\": \"100ml\"\r\n        }\r\n        \r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/recetas_ingredientes",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"recetas_ingredientes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "preparaciones",
+			"item": [
+				{
+					"name": "preparaciones",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"receta_id\": 1,\r\n    \"orden\": 2,\r\n    \"descripcion\": \"Echar el pollo al agua hirbiendo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/preparaciones",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"preparaciones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "preparaciones/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/preparaciones/1",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"preparaciones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url_local",
+			"value": "http://127.0.0.1:5000"
+		}
+	]
+}

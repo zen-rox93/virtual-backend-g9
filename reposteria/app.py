@@ -1,3 +1,5 @@
+
+from controllers.preparacion import PreparacionesController
 from flask import Flask
 from conexion_bd import base_de_datos
 from models.ingrediente import IngredienteModel
@@ -9,8 +11,11 @@ from models.log import LogModel
 from controllers.ingrediente import (IngredientesController, 
                                     IngredienteController,
                                     FiltroIngredientesController)
+from controllers.receta import RecetaController, RecetasController                                   
 from controllers.receta import RecetasController
 from controllers.receta_ingrediente import RecetaIngredientesController
+from controllers.preparacion import PreparacionesController
+
 from flask_restful import Api
 from os import environ
 from dotenv import load_dotenv
@@ -43,8 +48,14 @@ def initial_controller():
 api.add_resource(IngredientesController, '/ingredientes',)
 api.add_resource(IngredienteController, '/ingrediente/<int:id>')
 api.add_resource(FiltroIngredientesController, '/buscar_ingrediente')
+
 api.add_resource(RecetasController,'/recetas')
+api.add_resource(RecetaController,'/receta/<int:id>')
+
 api.add_resource(RecetaIngredientesController, '/recetas_ingredientes')
+
+
+api.add_resource(PreparacionesController, '/preparaciones','/preparaciones/<int:id>')
 
 if __name__ == '__main__':
     app.run(debug=True)
