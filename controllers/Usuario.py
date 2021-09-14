@@ -1,10 +1,17 @@
 
+from logging import error
 from flask_restful import Resource, reqparse
 from re import search
 from bcrypt import hashpw, gensalt, checkpw
 from models.Usuario import UsuarioModel
 from config.conexion_bd import base_de_datos
 from flask_jwt import jwt_required, current_identity
+from sqlalchemy.exc import IntegrityError 
+from cryptography.fernet import Fernet
+from os import environ
+from datetime import datetime, timedelta
+from json import dumps
+from config.enviar_correo import enviarCorreo
 
 
 
@@ -190,31 +197,95 @@ class UsuarioController(Resource):
         )
 
         data = serializador.parse_args()
+        print(data)
         usuarioId = current_identity.get('usuarioId')
         usuarioEncontrado = base_de_datos.session.query(
             UsuarioModel).filter(UsuarioModel.usuarioId == usuarioId).first()
         # operador ternario
         #Todo hacer que si el usuario envia la password entonces modificarla pero previamente usar bcrypt para  encriptar la contraseña
-        usuarioActualizado = base_de_datos.session.query(
-            UsuarioModel).update({
-                UsuarioModel.usuarioNombre: data.get(
-                'nombre') if data.get('nombre') is not None else usuarioEncontrado.usuarioNombre,
+        nuevaPwd = None
+        if data.get('password') is not None:
+            if search(PATRON_PASSWORD, data.get('password')) is None:
+                return {
+                    "message": "La contraseña debe tener al menos 1 mayus, 1 minus, 1 num y 1 caract"
+                }, 400
 
-                UsuarioModel.usuarioApellido: data.get('apellido') if data.get(
-                'apellido') is not None else usuarioEncontrado.usuarioApellido,
+            print('hay password')
+            
+            pwdb =bytes(data.get('password'), 'utf-8')
+            salt = gensalt(rounds=10)
+            nuevaPwd = hashpw(pwdb, salt).decode('utf-8')
+        print(nuevaPwd)
+        try:
+            usuarioActualizado = base_de_datos.session.query(
+                UsuarioModel).filter(UsuarioModel.usuarioId == usuarioEncontrado.usuarioId).update({
+                    UsuarioModel.usuarioNombre: data.get(
+                    'nombre') if data.get('nombre') is not None else usuarioEncontrado.usuarioNombre,
 
-                UsuarioModel.usuarioCorreo: data.get('correo') if data.get(
-                'correo') is not None else usuarioEncontrado.usuarioCorreo,
+                    UsuarioModel.usuarioApellido: data.get('apellido') if data.get(
+                    'apellido') is not None else usuarioEncontrado.usuarioApellido,
 
-                UsuarioModel.usuarioTelefono: data.get('telefono') if data.get(
-                    'telefono') is not None else usuarioEncontrado.usuarioTelefono,
-            })
+                    UsuarioModel.usuarioCorreo: data.get('correo') if data.get(
+                    'correo') is not None else usuarioEncontrado.usuarioCorreo,
 
+                    UsuarioModel.usuarioTelefono: data.get('telefono') if data.get(
+                        'telefono') is not None else usuarioEncontrado.usuarioTelefono,
 
-        print(usuarioActualizado)
-        base_de_datos.session.commit()
-        
-        return {
-            "message": "Usuario actualizado exitosamente"
+                    UsuarioModel.usuarioPassword: nuevaPwd if nuevaPwd is not None else usuarioEncontrado.usuarioPassword
+                })
+            print(usuarioActualizado)
+            base_de_datos.session.commit()
+            
+            return {
+                "message": "Usuario actualizado exitosamente"
+            }
+        except IntegrityError as error:
+            return {
+                "message": "Ya existe un registro con ese correo, no se puede duplicar el correo"
+            }, 400
+
+class ResetearPasswordController(Resource):
+    serializador = reqparse.RequestParser()
+    serializador.add_argument(
+        'correo',
+        type=str,
+        required=True,
+        location='json',
+        help='Falta el correo'
+    )
+
+    def post(self):
+        data = self.serializador.parse_args()
+        correo = data.get('correo')
+        if search(PATRON_CORREO, correo) is None:
+            return {
+                "message": "Formato de correo incorrecto"
+            }, 400
+        usuario = base_de_datos.session.query(UsuarioModel).filter(
+            UsuarioModel.usuarioCorreo == correo).first()
+        if not usuario:
+            return {
+                "message": "Usuario no encontrado"
+            }, 404
+        # if usuario is None:
+        if not usuario:
+            return {
+                "message": "Usuario no encontrado"
+            }, 404
+        print(environ.get('FERNET_SECRET'))
+        fernet = Fernet(environ.get('FERNET_SECRET'))
+        mensaje= {
+            "fecha_caducidad": str(datetime.utcnow()+timedelta(minutes=30)),
+            "correo": correo
         }
+        mensaje_json= dumps(mensaje)
+        mensaje_encriptado = fernet.encrypt(
+            bytes(mensaje_json, 'utf-8')).decode('utf-8')
+        print(mensaje_encriptado)
+        
+        enviarCorreo(correo, 'Esto es una pruebaaa')
+        return {
+            "message": "Se envio un correo con el cambio de password"
+        }
+
 
