@@ -17,7 +17,7 @@ def enviarCorreo(destinatario, cuerpo):
     mensaje['To'] = destinatario
     texto = cuerpo
     # Luego de definir el cuerpo del correo agregamos al mensaje mediante su metodo attach y en formato MIMETexten la cual recibira un texto y luego el format a convertir, si quieres enviar un html entonces pondremos en 'html', si queremos enviar un texto ' plain
-    mensaje.attach(MIMEText(texto, 'plain'))
+    mensaje.attach(MIMEText(texto, 'html'))
     try: 
         #configurar el servidor SMTP
         servidorSMPT = smtplib.SMTP('smtp.gmail.com',587)

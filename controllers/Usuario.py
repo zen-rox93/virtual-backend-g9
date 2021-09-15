@@ -1,6 +1,6 @@
 
 from logging import error
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, request
 from re import search
 from bcrypt import hashpw, gensalt, checkpw
 from models.Usuario import UsuarioModel
@@ -272,18 +272,24 @@ class ResetearPasswordController(Resource):
             return {
                 "message": "Usuario no encontrado"
             }, 404
-        print(environ.get('FERNET_SECRET'))
+        # print(environ.get('FERNET_SECRET'))
         fernet = Fernet(environ.get('FERNET_SECRET'))
         mensaje= {
-            "fecha_caducidad": str(datetime.utcnow()+timedelta(minutes=30)),
+            "fecha_caducidad": str(datetime.utcnow()+timedelta(hours=1)),
             "correo": correo
         }
         mensaje_json= dumps(mensaje)
         mensaje_encriptado = fernet.encrypt(
             bytes(mensaje_json, 'utf-8')).decode('utf-8')
-        print(mensaje_encriptado)
+        # print(mensaje_encriptado)
+        link = request.host_url+"change-password?token={}".format(
+            mensaje_encriptado)
         
-        enviarCorreo(correo, 'Esto es una pruebaaa')
+        enviarCorreo(correo, '''Hola, {}
+        Has solicitado el reinicio de tu contraseña, haz click en el siguiente link para efectuarla:
+            <br>
+            <a href="{}"<button style="background-color:peru; color:white; border:none; " >Cambiar</a></button>
+        '''.format(usuario.usuarioNombre, link))
         return {
             "message": "Se envio un correo con el cambio de password"
         }
