@@ -1,6 +1,7 @@
 import re
-from flask import Flask, current_app, render_template, request
+from flask import Flask, current_app, render_template, request, send_file
 from flask_restful import Api
+from sqlalchemy import exc
 from config.conexion_bd import base_de_datos
 from controllers.Tarea import TareasController
 from controllers.Usuario import (RegistroController, 
@@ -10,10 +11,16 @@ from flask_jwt import JWT
 from config.seguridad import autenticador, identificador
 from dotenv import load_dotenv
 from datetime import timedelta, datetime
-from os import environ
+from os import environ, path
 from config.configuracion_jwt import manejo_error_JWT
 from cryptography.fernet import Fernet
 from json import loads
+from models.Usuario import UsuarioModel
+from bcrypt import gensalt, hashpw
+from utils.patrones import PATRON_PASSWORD
+from re import search
+from uuid import uuid4
+
 
 load_dotenv()
 
@@ -42,6 +49,8 @@ print(app.config)
 jsonwebtoken.jwt_error_callback = manejo_error_JWT
 
 base_de_datos.init_app(app)
+
+base_de_datos.drop_all(app=app)
 base_de_datos.create_all(app=app)
 
 
@@ -111,7 +120,7 @@ def cambiar_password():
             fecha_actual = datetime.utcnow()
             if fecha_actual < fecha_caducidad:
                 print('todavia hay tiempo')
-                return render_template('change_password.jinja')
+                return render_template('change_password.jinja', correo=resultado['correo'])
             else:
                 print('ya no hay tiempo')
                 raise Exception('ya no hay tiempo')
@@ -121,9 +130,75 @@ def cambiar_password():
             print(e)
             return render_template('bad_token.jinja')
     elif request.method == 'POST':
+        print(request.get_json())
+        #buscar al usuario segun su correo
+        email = request.get_json().get('email')
+        password = request.get_json().get('password')
+        usuario = base_de_datos.session.query(UsuarioModel).filter(
+            UsuarioModel.usuarioCorreo == email).first()
+        if usuario is None:
+            return {
+                "message": "Usuario no existe"
+            }, 400
+
+        # validariamos el formato de la contraseña
+        if search(PATRON_PASSWORD, password) is None:
+            return {
+                "message": "Contraseña muy debil, debe tener al menos 1 mayus, 1 minus, 1 numero, 1 carac. especial y no menos de 6 caracteres"
+            }, 400
+        #encripto la nueva contraseña
+        password_bytes= bytes(password, 'utf-8')
+        nuevaPwd = hashpw(password_bytes, gensalt()).decode('utf-8')
+
+        #llamo al model para hacer el update
+        try:
+            base_de_datos.session.query(UsuarioModel).filter(
+                UsuarioModel.usuarioId == usuario.usuarioId).update({'usuarioPassword': nuevaPwd})
+
+            base_de_datos.session.commit()
+            return {
+                "message": "Se cambio la contraseña exitosamente"
+            }
+        except Exception as e:
+            print(e)
+            return {
+                "message": "Hubo un error al actualizar el usuario"
+            }
+
+@app.route('/subir-archivo-servidor', methods=['POST'])
+def subir_archivo_servidor():
+    archivo = request.files.get('imagen')
+    if archivo is None:
         return {
-            "message": "Se cambio la contraseña exitosamente"
+            "message": "Archivo no encontrado"
+        }, 404
+    # filename : retornara el nombre del archivo
+    print(archivo.filename)
+    # mimetype : retornara  el formato (tipo) del archivo
+    print(archivo.mimetype)
+    #sacar el nombre del archivo
+    #aaaaaaa.jpg
+    nombre_inicial = archivo.filename
+    #sacado su extension
+    extension = nombre_inicial.rsplit(".")[-1]
+    # genero un nuevo nombre del archivo
+    nuevo_nombre = str(uuid4())+'.'+extension
+    #uso ese nombre para guardar el archivo
+    archivo.save(path.join('media', nuevo_nombre))
+    return {
+        "message": "archivo subido exitosamente",
+        "content": {
+            "nombre": nuevo_nombre
         }
+    }, 201
+
+@app.route("/multimedia/<string:nombre>", methods=['GET'])
+def devolver_imagen_servidor(nombre):
+    try:
+        return send_file(path.join('media', nombre))
+    except:
+        return send_file(path.join('media', 'not_found.jpg'))
+
 #Rutas
 api.add_resource(RegistroController, '/registro')
 # api.add_resource(LoginController, '/login')
