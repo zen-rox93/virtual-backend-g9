@@ -36,7 +36,7 @@ config(
   api_secret =environ.get('API_SECRET') 
 )
 #config son las variables de configuracion de mi proyecto de flask DEBUG=TRUE, PORT= 5000, ENVIRONMENT=DEVELOPMENT
-app.config['SQLALCHEMY_DATABASE_URI']= environ.get('DATA_BASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI']= environ.get('DATABASE_URI')
 app.config['SQLALCHMEY_TRACK_MODIFICATIONS'] = False
 #contraseña de la token
 app.config['SECRET_KEY'] = environ.get('JWT_SECRET')
