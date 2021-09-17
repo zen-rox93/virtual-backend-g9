@@ -1,5 +1,0 @@
-heroku config --app nombre_app => lista de las variable de heroku
-heroku addons -a nombre_app => lista de los addons instaladas en la app con su plan y su pago
-heroku addons:services => lista todos los serivicos disponibles en heroku
-heroku addons:create nombre_addon =>plan -a nombre_app : contrata el addon a la aplicacion con us determinado plan
-heroku apps:create nombre_app => crea el nuevo proyecto de heroku
