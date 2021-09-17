@@ -4,6 +4,7 @@ from config.conexion_bd import base_de_datos
 from models.Tarea import TareaModel
 from flask_restful import Resource, reqparse
 from flask_jwt import current_identity, jwt_required
+from cloudinary import CloudinaryImage
 
 class TareasController(Resource):
     serializador = reqparse.RequestParser(bundle_errors=True)
@@ -86,8 +87,16 @@ class TareasController(Resource):
             tareaDict['tareaFechaCreacion'] = str(
                 tareaDict['tareaFechaCreacion'])
 
+            
+            respuestaCD = CloudinaryImage(tarea.tareaImagen).image(transformation=[
+                {'background': "#ce6767", 'border': "17px_solid_rgb:000", 'height': 310, 'quality': 46, 'radius': 14, 'width': 634, 'zoom': "1.8", 'crop': "scale"},
+                {'angle': 185}
+            ])
+            #cuando en vz de solamente usar lka instacnai de la clase, llamaomos a su metodo image entonces ya no retonara una instancia sino que retorenara una etiqueta img con sus propiedad src para que pueda ser renderizada en el fronted, caso contrario si solamente usamos la clase CloudinaryImage esa nos retornara un metodo llamado url que sera la url de la imagen sin modificaiones
+            print(respuestaCD)
+        
             tareaDict['tareaEstado'] = tareaDict['tareaEstado'].value
-
+            tareaDict['tareaImagen'] = respuestaCD
             resultado.append(tareaDict)
         # devolver todas las tareas correspondiente al usuario del current_identity
         return{
