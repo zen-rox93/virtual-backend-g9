@@ -26,6 +26,10 @@ class ProductoModel(models.Model):
     productoUnidadMedida = models.TextField(
         choices=OpcionesUM.choices, default=OpcionesUM.UNIDAD, db_column='unidad_medida')
 
+    productoEstado = models.BooleanField(
+        db_column='estado', default=True, null=False)
+    
+
     def __str__(self):
         return self.productoNombre
     class Meta:
@@ -53,6 +57,12 @@ class ClienteModel(models.Model):
 
     clienteDireccion = models.CharField(
         max_length=100, db_column='direccion', verbose_name='direccion')
+    
+    ClienteEstado = models.BooleanField(
+        db_column='estado', default=True, null=False)
+    
+
+    
 
     def __str__(self):
         #Metodo que permite sobreescribir la forma en la cual se mostrara el objeto por consola al ser consultado en su totalidad
