@@ -15,7 +15,11 @@ class ProductoSerializer(serializers.ModelSerializer):
         # no se puede utilizar los dos atributos al mismo tiempo, es decir, o usamos el exclude o usamos el fields 
 
 class ClienteSerializer(serializers.ModelSerializer):
-
+    clienteNombre = serializers.CharField(
+        max_length=45, required=False,  trim_whitespace=True, read_only=True)
+    clienteDireccion = serializers.CharField(
+        max_length=100, required=False, trim_whitespace=True)
+    # clienteSexo = serializers.CharField(required=True, max_length=45)
     class Meta:
         model = ClienteModel
         fields = '__all__'
