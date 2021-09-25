@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ProductoModel
+from .models import ClienteModel, ProductoModel
 
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,4 +13,10 @@ class ProductoSerializer(serializers.ModelSerializer):
         # exclude = ['productoId']
 
         # no se puede utilizar los dos atributos al mismo tiempo, es decir, o usamos el exclude o usamos el fields 
+
+class ClienteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ClienteModel
+        fields = '__all__'
          
