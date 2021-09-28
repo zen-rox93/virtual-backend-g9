@@ -1,15 +1,19 @@
+from rest_framework import serializers
 from rest_framework.serializers import Serializer
-from .models import ProductoModel, ClienteModel
+from .models import CabeceraModel, ProductoModel, ClienteModel
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
 from .models import ProductoModel
-from .serializers import ProductoSerializer, ClienteSerializer
+from .serializers import ProductoSerializer, ClienteSerializer, OperacionSerializer
 from rest_framework import status
 from .utils import PaginacionPersonalizada
 import requests as solicitudes
 from os import environ
+from django.db.models.query import QuerySet
+from django.db import transaction, Error
+from datetime import datetime
 
 class PruebaController(APIView):
     def get(self, request, format=None):
@@ -195,12 +199,12 @@ class ClienteController(CreateAPIView):
             return Response(data={
                 'message': 'Cliente agregado exitosamente',
                 'content': nuevoClienteSerializado.data
-            })
+            }, status=status.HTTP_201_CREATED)
         else:
             return Response(data={
                 'message':'Error al ingresar el cliente',
                 'content': data.errors
-            })
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class BuscadorClienteController(RetrieveAPIView):
     serializer_class = ClienteSerializer
@@ -211,32 +215,71 @@ class BuscadorClienteController(RetrieveAPIView):
         documento = request.query_params.get('documento')
 
         #si tengo documento hare una busqueda todos los clientes por ese documento
+        clienteEncontrado = None
         if documento: 
-            clienteEncontrado = ClienteModel.objects.filter(
-                clienteDocumento=documento).first()
-            #si no existe el cliente retornar un resultado
-            if clienteEncontrado is None:       
-                return Response({
-                    'message': 'Cliente no existe'
-                }, status=status.HTTP_404_NOT_FOUND)
+            clienteEncontrado: QuerySet = ClienteModel.objects.filter(
+                clienteDocumento=documento)
+            
 
-            data = self.serializer_class(instance=clienteEncontrado)
+            # data = self.serializer_class(instance=clienteEncontrado, many=True)
 
-            return Response({'content': data.data})
+            # return Response({'content': data.data})
 
         if nombre:
-            clientes = ClienteModel.objects.filter(
-                clienteNombre__contains=nombre.upper()).all()
-
-            data = self.serializer_class(instance=clientes, many=True)
 
 
-            return Response(data={
-                'content': data.data
-            })
-            return Response({'message': None})
+            if clienteEncontrado is not None:
+                clienteEncontrado = clienteEncontrado.filter(
+                    clienteNombre__icontains=nombre).all()
+            else:
+                clienteEncontrado = ClienteModel.objects.filter(
+                    clienteNombre__icontains=nombre).all()
+
+
+        data = self.serializer_class(instance=clienteEncontrado, many=True)
+        return Response(data={
+            'message': 'Los usuarios son:',
+            'content': data.data
+        })
+            
     
+class OperacionController(CreateAPIView):
+    serializer_class = OperacionSerializer
 
+    def post(self, request: Request):
+        data = self.serializer_class(data= request.data)
+        if data.is_valid():
+            # si el cliente existe o no existe
+            documento = data.validated_data.get('cliente')
+            clienteEncontrado = ClienteModel.objects.filter(
+                clienteDocumento=documento).first()
+            print(clienteEncontrado)
+            detalle = data.validated_data.get('detalle')
+            tipo = data.validated_data.get('tipo')
 
+            try:
+                with transaction.atomic():
+                    if clienteEncontrado is None:
+                        raise Exception('Usuario no existe')
+
+                    nuevaCabecera = CabeceraModel(
+                        cabeceraTipo=tipo, clientes=clienteEncontrado.id).save()
+                    
+
+            except Error as e:
+                print(e)
+                return Response (data= {
+                    'message': 'Operacion registrada exitosamente',
+                    'content': e.args
+                })
+            except Exception as exc:
+                return Response(data={
+                    'message': 'Error al crear la operacion',
+                    'content': exc.args
+                })
         
-    
+        else:
+            return Response(data={
+                'message': 'Error al crear la operacion',
+                'content': data.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
