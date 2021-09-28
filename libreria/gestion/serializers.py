@@ -1,6 +1,6 @@
 from django.test.utils import require_jinja2
 from rest_framework import serializers
-from .models import ClienteModel, ProductoModel
+from .models import ClienteModel, DetalleModel, ProductoModel, CabeceraModel
 
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,4 +43,23 @@ class OperacionSerializer(serializers.Serializer):
      max_length=11)
 
     detalle = DetalleOperacionSerializer(many=True)
-         
+
+
+
+class DetalleOperacionModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetalleModel
+        # fields = '__all__'
+        exclude = ['cabeceras']
+        depth = 1
+
+class OperacionModelSerializer(serializers.ModelSerializer):
+    cabeceraDetalles = DetalleOperacionModelSerializer(
+        #  source='cabeceraDetalle', 
+         many=True)
+
+    class Meta:
+         model = CabeceraModel
+         fields= '__all__'
+         # con el atributo depth indicare cuantos niveles quiero agregar para mostrar la informacion en el caso de los FK's
+         depth = 1
