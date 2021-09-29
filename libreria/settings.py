@@ -156,6 +156,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_METHODS = ['GET', 'POST']
 
 #Los headers que pueden enviar a mi api
-CORS_ALLOWED_HEADERS = ['Content-Type', 'origin', 'Authorization']
+CORS_ALLOWED_HEADERS = ['Content-Type', 'origin', 'Authorization', "accept"]
+
+
+#ES DONDE SE ALMACENARAN TODOS LOS ARCHIVOS STATICOS DE LA APLICACION (css,js,html) de las librerias que usan dichos recursos DRF, SWAGGER, ADMIM SITE
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
