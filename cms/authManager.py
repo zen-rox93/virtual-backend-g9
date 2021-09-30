@@ -11,7 +11,7 @@ class ManejoUsuarios(BaseUserManager):
         # validar mi correo
         email = self.normalize_email(email)
         # creo mi instancia del usuario
-        usuarioCreado = self.model(usuarioCorreo=email, usuarioNombre=nombre, usuarioApellido=apellido, usuario=tipo)
+        usuarioCreado = self.model(usuarioCorreo=email, usuarioNombre=nombre, usuarioApellido=apellido, usuarioTipo=tipo)
 
         # set_password() = encriptara la contraseña
         usuarioCreado.set_password(password)
@@ -20,10 +20,12 @@ class ManejoUsuarios(BaseUserManager):
 
         return usuarioCreado
 
-    def create_superuser(self, email, nombre, apellido, tipo, password):
+    def create_superuser(self, usuarioCorreo, usuarioNombre, usuarioApellido, usuarioTipo, password):
         """Creacion de un superus usuario (administrador)"""
+
+        # los parametros que va a recibir rienen que ser los mismos que hubiesemos declarado en el usuarioModel REQUIRED_FIELD y en el USERNAME_FIELD, llegaran con esos mismo n
         nuevoUsuario = self.create_user(
-            email, nombre, apellido, tipo, password)
+            usuarioCorreo, usuarioNombre,  usuarioApellido, usuarioTipo, password)
 
         nuevoUsuario.is_superuser=True
         nuevoUsuario.is_staff = True
