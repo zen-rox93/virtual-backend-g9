@@ -1,7 +1,10 @@
+from django.core import validators
 from django.db import models
+from django.db.models.deletion import PROTECT
 from django.db.models.fields import BooleanField, related
 from .authManager import ManejoUsuarios
 from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser
+from django.core.validators import MinValueValidator
 
 
 class PlatoModel(models.Model):
@@ -41,7 +44,7 @@ class UsuarioModel(AbstractBaseUser, PermissionsMixin):
 
     usuarioId = models.AutoField(primary_key=True, db_column='id', unique=True, null=False)
     usuarioNombre = models.CharField(max_length=50, db_column='nombre')
-    usuarioApellido = models.CharField(max_lenght=50, db_column='apellido', verbose_name='Apellido del usuario')
+    usuarioApellido = models.CharField(max_length=50, db_column='apellido', verbose_name='Apellido del usuario')
     usuarioCorreo = models.EmailField(max_length=50, db_column='email', unique=True)
     usuarioTipo = models.IntegerField(choices=TIPO_USUARIO, db_column='tipo')
     password = models.TextField(null=True)
@@ -67,26 +70,26 @@ class PedidoModel(models.Model):
     pedidoFecha = models.DateTimeField(auto_now_add=True, db_column='fecha')
     pedidoTotal = models.DecimalField(max_digits=5, decimal_places=2, db_column='total')
     cliente = models.ForeignKey(
-        to=UsuarioModel, related_name='clientePedidos', db_column='cliente_id')
+        to=UsuarioModel, related_name='clientePedidos', db_column='cliente_id', on_delete=models.PROTECT)
     vendedor = models.ForeignKey(
-        to=UsuarioModel, related_name='vendedorPedidos', db_column='vendedor_id')
+        to=UsuarioModel, related_name='vendedorPedidos', db_column='vendedor_id', on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'pedidos'
 
 class DetallePedidoModel(models.Model):
-    detalleId = models.AutoField(primary_key=True, db_column='id', unique=True)
-    
+    detalleId = models.AutoField(primary_key=True, db_column='id', unique=True, )
+
     detalleCantidad = models.IntegerField(
-        db_column='cantidad', null=False)
+        db_column='cantidad', null=False, validators=[MinValueValidator(0, 'Valor no puede ser negativo')])
 
     detalleSubtotal = models.DecimalField(max_digits=5, decimal_places=2, db_column='sub_total')
 
     plato = models.ForeignKey(
-        to=PlatoModel, related_name='platoDetalle', db_column='plato_id')
-    pedido = models.ForeignObject(
+        to=PlatoModel, related_name='platoDetalle', db_column='plato_id', on_delete=PROTECT)
+    pedido = models.ForeignKey(
 
-        to=PedidoModel, related_name='pedidoDetalles', db_column='pedido_id')
+        to=PedidoModel, related_name='pedidoDetalles', db_column='pedido_id', on_delete=PROTECT)
 
     class Meta:
         db_table = 'detalles'
