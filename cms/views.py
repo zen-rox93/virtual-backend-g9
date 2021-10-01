@@ -59,10 +59,7 @@ class SubirImagenController(CreateAPIView):
                 'content': url + archivo 
             }, status=status.HTTP_201_CREATED)
 
-            return Response(data={
-                'message': 'Archivo subido exitosamente',
-                'content': archivo
-            }, status=status.HTTP_201_CREATED)
+            
         else:
             return Response(data={
                 'message': 'Error al crear el archivo',
