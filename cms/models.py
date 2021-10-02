@@ -31,7 +31,7 @@ class PlatoModel(models.Model):
     updatedAt = models.DateTimeField(db_column='updated_at', auto_now=True)
 
     # auto_now_Add = cuando se cree un nuevo registro, agarrara la fecha actual y lo creara en esta columna
-    createdAt = models.DateTimeField()
+    createdAt = models.DateTimeField(db_column='created_at', auto_now_add=True)
 
     class Meta:
         db_table = 'platos'

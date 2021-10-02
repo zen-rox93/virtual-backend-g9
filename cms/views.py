@@ -1,10 +1,12 @@
 
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from cms.serializers import ImagenSerializer, PlatoSerializer, RegistroSerializer
 from .models import PlatoModel
 from rest_framework import status
+from os import remove
+from django.conf import settings
 
 
 
@@ -25,7 +27,7 @@ class RegistroController(CreateAPIView):
                 'content': data.errors
             })
 
-class PlatoController(CreateAPIView):
+class PlatosController(ListCreateAPIView):
     serializer_class = PlatoSerializer
     queryset = PlatoModel.objects.all()
 
@@ -44,6 +46,13 @@ class PlatoController(CreateAPIView):
                 'content': data.errors
             }, status=400)
 
+    def get(self, request):
+        data = self.serializer_class(instance=self.get_queryset(), many=True)
+        return Response(data={
+            'message': None,
+            'content': data.data
+        })
+        
 class SubirImagenController(CreateAPIView):
     serializer_class = ImagenSerializer
 
@@ -65,3 +74,46 @@ class SubirImagenController(CreateAPIView):
                 'message': 'Error al crear el archivo',
                 'content': data.errors
             }, status=status.HTTP_400_BAD_REQUEST)
+
+class PlatoController(RetrieveUpdateDestroyAPIView):
+    serializer_class = PlatoSerializer
+    queryset = PlatoModel.objects.all()
+
+    def post(self, request):
+        pass
+
+    def get(self, request, id):
+        platoEncontrado = self.get_queryset().filter(platoId= id).first()
+
+        if not platoEncontrado:
+            return Response(data={
+                'message': 'Plato no encontrado'
+
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        data = self.serializer_class(instance=platoEncontrado)
+
+        return Response(data={
+            'content': data.data
+        })
+
+    def delete(self, request, id):
+
+        platoEncontrado = self.get_queryset().filter(platoId= id).first()
+        if not platoEncontrado:
+            return Response(data={
+                'message': 'Plato no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            pass
+            data = platoEncontrado.delete()
+            remove(settings.MEDIA_ROOT / str(platoEncontrado.platoFoto))
+        except Exception as e:
+            print(e)
+
+        # data = PlatoModel.objects.filter(platoId=id).delete()
+        # print(data)
+        return Response(data={
+            'message': 'Plato eliminado exitosamente'
+        })
