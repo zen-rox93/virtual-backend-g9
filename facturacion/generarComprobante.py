@@ -6,6 +6,10 @@ from os import environ
 
 
 def crearComprobante(tipo_de_comprobante: int, pedido: PedidoModel, documento_cliente: str):
+
+    comprobante_creado = ComprobanteModel.objects.filter(pedido = pedido.pedidoId).first()
+    if comprobante_creado:
+        return 'El pedido ya tiene un comprobante'
     operacion='generar_comprobante'
     if tipo_de_comprobante == 1:
         serie = 'FFF1' # *
@@ -23,9 +27,10 @@ def crearComprobante(tipo_de_comprobante: int, pedido: PedidoModel, documento_cl
     if not ultimoComprobante:
         numero = 1
     else:
-        numero = ultimoComprobante.comprobanteNumero + 1
+        numero =  int(ultimoComprobante[0]) + 1
     sunat_transaction=1 
-    cliente_tipo_de_documento = (1 if len(documento_cliente) == 8 else 6) if documento_cliente else 6
+    cliente_tipo_de_documento = (
+        1 if len(documento_cliente) == 8 else 6) if documento_cliente else 6
 
     cliente_numero_de_documento = documento_cliente
 
@@ -102,6 +107,22 @@ def crearComprobante(tipo_de_comprobante: int, pedido: PedidoModel, documento_cl
     respuesta = post(environ.get('NUBEFACT_URL'),
                     json=comprobante, headers=headers_nubefact)
     print(comprobante)
+
+    if respuesta.status_code == 200:
+        tipo_de_comprobante = 'F' if tipo_de_comprobante == 1 else 'B'
+        nuevoComprobante = ComprobanteModel(
+            comprobanteSerie=serie,
+            comprobanteNumero=numero,
+            comprobanteTipo= tipo_de_comprobante,
+            comprobantePDF= respuesta.json().get('enlace_del_pdf'),
+            comprobanteXML=respuesta.json().get('enlace_del_xml'),
+            comprobanteCDR=respuesta.json().get('enlace_del_cdr'),
+            pedido=pedido)
+
+        nuevoComprobante.save()
+        return nuevoComprobante
+    else:
+        return respuesta.json().get('errors')
     print(respuesta.json())
 
     

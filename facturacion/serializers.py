@@ -1,6 +1,7 @@
 
 from rest_framework import serializers
 from cms.models import PedidoModel
+from facturacion.models import ComprobanteModel
 
 
 class ComprobanteSerializer(serializers.Serializer):
@@ -23,3 +24,9 @@ class ComprobanteSerializer(serializers.Serializer):
             return data 
         except:
             raise serializers.ValidationError(detail='Error en el pedido')
+
+class ComprobanteModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = ComprobanteModel
