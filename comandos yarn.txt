@@ -5,3 +5,5 @@ yarn add nombre_libreria = buscara esa libreria
 yarn remove nombre_libreria = desintalara la libreria en donde sea que este ubicada
 
 yarn global add nombre_libreria = instala una libreria de manera global
+
+yarn | yarn install = instalare todas las librerias declaradas en el packge.json y basandose 

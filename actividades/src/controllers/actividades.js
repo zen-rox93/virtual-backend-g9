@@ -1,5 +1,16 @@
 // CRUD de las actividades
-const actividades = [];
+const actividades = [
+    {
+        nombre: 'Ir al gimnasio',
+        hora: "6:00",
+        dias: ["LUN", "MIE", "VIE"]
+    },
+    {
+        nombre: "Aprender MongoDb",
+        hora: "22:00",
+        dias: ["MAR", "SAB"]
+    }
+];
 
 
 export const crearActividad = (req, res)=>{
@@ -20,4 +31,40 @@ export const listarActividades = (req, res)=>{
     });
 
     res.send("Yo soy otra respuesta");
+};
+
+export const devolverActividad = (req, res)=>{
+    console.log(req.params);
+    const {id} = req.params;
+
+    if (actividades.length > id) {
+        return res.json({
+            message: null,
+            content: actividades[id],
+        });
+    }else {
+    return res.json({
+        message: "Actividad no encontrada",
+        content: null,
+
+        });
+    }
+};
+
+export const actualizarActividad = (req, res)=>{
+    const {id} = req.params
+    if(actividades.length > id){
+        actividades[id] = req.body
+
+        return res.json({
+            message: "actividad actualizada exitosamente",
+            content: actividades[id],
+        });
+    } else {
+        return res.status(404).json({
+            message: "No se encontro la actividad a actualizar",
+            content: null
+        });
+    }
+
 };
