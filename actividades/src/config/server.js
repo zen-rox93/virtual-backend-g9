@@ -8,6 +8,7 @@ export class Server {
     constructor(){
         this.app = express();
         this.puerto = 8000;
+        this.cors();
         this.bodyParser();
         this.rutas();
         
@@ -29,6 +30,20 @@ export class Server {
             res.status(200).send("Bienvenido a mi API")
         });
     }
+
+    cors(){
+        this.app.use((req, res, next)=>{
+            // Access-Control-Allow-Origin => indica que origenes pueden acceder a mi api (si queremos todos ponemos el *)
+            res.header('Access-Control-Allow-Origin', '*')
+            // Access-Control-Allow-Headers => indica las cabeceras permitidas que puede enviar el cliente
+            res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            // Access-Control-Allow-Methods => indica los metodos a los que puede acceder mi cliente
+            res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+
+            next();
+        });
+    }
+
     start(){
         this.app.listen(this.puerto, ()=>{console.log(`Servidor corriendo en el puerto ${this.puerto}`);})
             
