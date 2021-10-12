@@ -6,7 +6,7 @@ export const serializadorTarea = (req, res, next)=>{
     const data = req.body;
     const dataTarea = {
         tareaNombre: data.nombreTarea,
-        tareaDias: data.diasTarea,
+        tareaDia: data.diasTarea,
         tareaHora: data.horaTarea
     };
 
@@ -39,7 +39,10 @@ export const crearTarea = async(req, res)=> {
       
 };
 
+
 export const listarTareas = async (req, res)=>{
+    
+    
     const tareas = await Tarea.findAll();
 
     return res.json({
@@ -100,28 +103,73 @@ export const devolverTarea = async (req, res) => {
 
 export const filtrarTareas = async(req,res)=>{
     const { dias, hora, nombre } =req.query;
-    const tareas = await Tarea.findAll({
-        where:{
-            tareaNombre:{
-                [Op.like]: "%" + nombre + "%",
+    let filtros = [];
+    
+    if (nombre) {
+        filtros = [
+            ...filtros,
+            {
+                tareaNombre: {
+                    [Op.iLike]: "%" + nombre + "%",
+                },
             },
-            tareaHora: hora,
-            //Todo: revisar la forma en al cual se pueda hacer un where en un array en postgresql con sequelize
-            
-            tareaDias: {
-                [Op.in]: dias,
+        ];
+    }
+    
+    if (hora) {
+        filtros = [
+            ...filtros,
+            {
+                tareaHora: hora,
             },
-        }, 
-        // si queremos indicar que columanas queremos retornar entonces usaremos el atributo attributes indicando en un array indicando como primer parametro el nombre de la col. en la bd y como segundo el alias
-        // attributes: [["nombre", "nombrecito" ], "tareaDia"],
-        //si queremos excluir una determinada columna 0 columanas
-        attributes:{
-            exclude: ["createdAt", "fecha_de_actualizacion"],
-        },
-        logging: console.log,
-    });
+        ];
+    }
+    
+    if (dias) {
+        //Buscar si hay una
+        const dias_array = dias.split(",")
+        filtros = [
+            ...filtros,
+            {
+                tareaDia: {
+                    [Op.contains]: dias_array,
+                },
+            },
+        ];
+    }
+    try{
+        const tareas = await Tarea.findAll({
+            where:{
+                [Op.and]:filtros
+                // tareaNombre:{
+                //     [Op.like]: "%" + nombre + "%",
+                // },
+                // tareaHora: hora,
+                // //Todo: revisar la forma en al cual se pueda hacer un where en un array en postgresql con sequelize
+                
+                // tareaDia: {
+                //     [Op.contains]: [dias],
+                // },
+            }, 
+            // si queremos indicar que columanas queremos retornar entonces usaremos el atributo attributes indicando en un array indicando como primer parametro el nombre de la col. en la bd y como segundo el alias
+            // attributes: [["nombre", "nombrecito" ], "tareaDia"],
+            //si queremos excluir una determinada columna 0 columanas
+            attributes:{
+                exclude: ["createdAt", "fecha_de_actualizacion"],
+            },
+            // logging: console.log,
+        })
 
-    return res.json({
-        content: tareas,
-    });
-};
+        return res.json({
+            content: tareas,
+        });
+
+    
+        }catch (e) {
+            console.log(e);
+            return res.json({
+                message: "Valores incorrectos",
+                content: [],
+            });
+        }
+    };
