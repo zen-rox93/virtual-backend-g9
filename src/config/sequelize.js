@@ -9,6 +9,7 @@ export const conexion = new Sequelize(
     dialectOptions: 
         process.env.NODE_ENV === "production"
         ? {
+            
             ssl: {
                 rejectUnauthorized: false,
             },
