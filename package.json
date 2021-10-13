@@ -1,0 +1,12 @@
+{
+  "name": "bodega",
+  "version": "1.0.0",
+  "description": "proyecto usando TS con pasarela de pagos",
+  "main": "index.js",
+  "repository": "https://github.com/zen-rox93/virtual-backend-g9.git",
+  "author": "zen-rox93 <84250823+zen-rox93@users.noreply.github.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}

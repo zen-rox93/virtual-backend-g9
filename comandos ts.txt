@@ -1,0 +1,4 @@
+una vez que hemos instalado typescript 
+yarn tsc = buscara el tsconfig.json para de acuerdo a ello compilar todos los archivos de formato typescript
+yarn tsc nombre_archivo.ts => compilar el archivo tsc sin importarsi tenemos el archivo tssconfig.json y usara las configuraciones por defecto de tsc
+yarn tsc --init => creara el archivo tsconfig.json en el directorio actuak con las opciones recomendadas del compilador de tsc con sus comentarios de para que sirve cada opcion
