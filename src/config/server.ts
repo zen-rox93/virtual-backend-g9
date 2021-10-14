@@ -1,4 +1,5 @@
 import express, {Express, json} from 'express';
+import usuarioRouter from '../routes/usuario.routes';
 import conexion from "./sequelize";
 
 export class Server {
@@ -9,10 +10,18 @@ export class Server {
     constructor(){
         this.app = express();
         this.puerto = 8000;
+        this.bodyParser();
+        this.rutas();
     }
     bodyParser(){
         this.app.use(json());
     }
+
+    private rutas() {
+        this.app.use(usuarioRouter);
+    }
+    
+
 
     public start(){
         this.app.listen(this.puerto, async()=>{

@@ -1,0 +1,38 @@
+import { DataTypes } from 'sequelize';
+import conexion from '../config/sequelize';
+
+export default () => 
+    conexion.define('producto', {
+        productoId: {
+            primaryKey: true,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            field: 'id'
+        },
+        productoNombre: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            field: 'nombre'
+        },
+        productoPrecio: {
+            type: DataTypes.DECIMAL(5, 2),
+            allowNull: false,
+            field: "nombre",
+        },
+        productoCantidad: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            field: "cantidad",
+        },
+        productoFoto: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            field: "foto",
+        },
+    },
+        {
+        tableName: "productos",
+        timestamps: false,
+        }
+
+    );
