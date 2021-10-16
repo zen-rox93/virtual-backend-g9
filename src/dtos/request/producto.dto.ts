@@ -1,4 +1,4 @@
-import { IsArray, IsDecimal, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from "class-validator"
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from "class-validator"
 
 export class crearProductoDto{
 
@@ -7,7 +7,7 @@ export class crearProductoDto{
     productoNombre: string;
 
     @IsPositive()
-    @IsDecimal()
+    @IsNumber()
     productoPrecio: number;
 
     @IsNumber()

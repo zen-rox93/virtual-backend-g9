@@ -17,7 +17,7 @@ export default () =>
         productoPrecio: {
             type: DataTypes.DECIMAL(5, 2),
             allowNull: false,
-            field: "nombre",
+            field: "precio",
         },
         productoCantidad: {
             type: DataTypes.INTEGER,
@@ -25,7 +25,7 @@ export default () =>
             field: "cantidad",
         },
         productoFoto: {
-            type: DataTypes.TEXT,
+            type: DataTypes.ARRAY(DataTypes.TEXT),
             allowNull: true,
             field: "foto",
         },
