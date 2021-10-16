@@ -51,7 +51,7 @@ export default () =>
         defaultValue: TipoUsuario.CLIENTE
     },
     usuarioFoto: {
-        type: DataTypes.ARRAY(DataTypes.TEXT),
+        type: DataTypes.TEXT,
         field: "foto",
     }},
     {

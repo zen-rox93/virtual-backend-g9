@@ -4,17 +4,22 @@ import {Request, Response} from 'express';
 import { Usuarios } from '../config/models';
 import { RegistroDto } from '../dtos/request/registro.dto';
 import { UsuarioDto } from "../response/usuario.dto"; 
-import { sign } from "jsonwebtoken";
+import { sign, SignOptions } from "jsonwebtoken";
 import { TipoUsuario } from "../models/usuarios.model";
 import { LoginDto } from "../dtos/request/login.dto";
 import { compareSync } from 'bcrypt' 
 import { RequestUser } from "../middlewares/validator";
+import {v2} from "cloudinary";
 
 interface Payload {
     usuarioNombre: string
     usuarioId: string
     usuarioFoto?: string
     usuarioTipo: TipoUsuario
+}
+
+const tokenOptions: SignOptions = {
+    expiresIn: '1h'
 }
 
 
@@ -125,7 +130,7 @@ export const login = async(req: Request, res: Response) =>{
 
         };
         
-        const jwt = sign(payload, process.env.JWT_TOKEN ?? "");
+        const jwt = sign(payload, process.env.JWT_TOKEN ?? "", tokenOptions);
 
         return res.json({
             content: jwt,
@@ -144,8 +149,36 @@ export const login = async(req: Request, res: Response) =>{
 export const perfil = (req: RequestUser, res: Response) => {
     // console.log(req.usuario);
     const content = plainToClass(UsuarioDto, req.usuario);
+    if (!content.usuarioFoto) {
+        console.log(content.usuarioNombre);
+        let [nombre, apellido] = content.usuarioNombre.split("");
+
+        content.usuarioFoto = `https://avatars.dicebear.com/api/initials/${
+            nombre[0]
+        }${apellido  ? apellido[0] : ""}.svg`;
+        
+    }else {
+        const url = v2.url(content.usuarioFoto, {
+            width: 200,
+            angle: 45,
+            transformation: {effect: "cartoonify"}
+        });
+        content.usuarioFoto = url;
+    }
+
+
     return res.json({
         message: "Hola desde el endpoint final",
         content,
     });
 };
+
+
+
+
+export const actulizarPerfil = (req: RequestUser, res: Response)=>{
+    // hacer un path para que el usuairo pueda modificar su nombre, su correo, su foto o su contraseña
+    // req.usuario = ya tiene toda la info del us
+
+};
+

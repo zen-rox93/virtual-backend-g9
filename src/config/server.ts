@@ -1,6 +1,10 @@
 import express, {Express, json} from 'express';
 import usuarioRouter from '../routes/usuario.routes';
 import conexion from "./sequelize";
+import imagenRouter from "../routes/imagen.routes";
+import { v2 } from "cloudinary";
+import productoRouter from '../routes/producto.routes';
+
 
 export class Server {
     // private = no podra ser aaccedido desde fuera de la clase
@@ -12,6 +16,11 @@ export class Server {
         this.puerto = 8000;
         this.bodyParser();
         this.rutas();
+        v2.config({
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        })
     }
     bodyParser(){
         this.app.use(json());
@@ -19,6 +28,8 @@ export class Server {
 
     private rutas() {
         this.app.use(usuarioRouter);
+        this.app.use(imagenRouter);
+        this.app.use(productoRouter);
     }
     
 
@@ -28,7 +39,7 @@ export class Server {
             console.log(
                 `Servidor corriendo exitosamente en el puerto ${this.puerto}`
             );
-            await conexion.sync()
+            await conexion.sync({})
             console.log("Base de datos conectada exitosamente")
         });
     }
