@@ -5,6 +5,9 @@ import { Compras, Detalles, Productos } from "../config/models";
 import { CompraDto} from "../dtos/request/compra.dto";
 import conexion from '../config/sequelize'
 import { RequestUser } from "../middlewares/validator";
+import { configure, preferences } from "mercadopago";
+
+import { CreatePreferencePayload } from "mercadopago/models/preferences/create-payload.model";
 
 
 export const crearCompra = async (req: RequestUser, res: Response)=> {
@@ -179,4 +182,69 @@ export const crearCompra = async (req: RequestUser, res: Response)=> {
     return res.json({
         message: "Compra creada exitosamente"
     });
+};
+
+export const crearPreferencia = async (req: Request, res:Response) => {
+    // el metodo configure me sirve para configurar mi mercadopago en toda la aplicacion, sele tiene que proveer los campos access:token e integrator_id
+    // access_token => token que se usara POR CADA APLICACION (sirve para que MP sepa a que negocio tiene que depositar y ademas en el extractro de cuenta del comprador colocar correctamente el nombre del negocio)
+    // integrator_id => indentificacion del desarrolladorque efectuo la integracion (sirve para que MP reconozca quien fue el que implmento y asi brindale mejores beneficios) (disminuye la comision por venta y otros beenficios mas)
+    configure({
+        access_token: 
+        'APP_USR-8208253118659647-112521-dd670f3fd6aa9147df51117701a2082e-677408439',
+        integrator_id: 'dev_24c65fb163bf11ea96500242ac130004',
+    });
+    const payload: CreatePreferencePayload = { payer: {
+        name: 'Lalo',
+        surname: 'Landa',
+        // address: {
+        //     street_name: 'Falsa',
+        //     street_number: "123",
+        //     zip_code: "1111",
+        // },
+        email: "test_user_46542185@testuser.com",
+    // phone: {
+    //     area_code: '11',
+    //     number: '22223333',
+    // },
+    identification: {
+        number: '22334445',
+        type: 'DNI'
+    }
+    },
+    items: [{
+        id: '12',
+        title: 'Yogurt Griego de 1lt.',
+        description: 'Sabroso yogurt de tierras griegas',
+        picture_url: 'https:// ...',
+        category_id: '001',
+        quantity: 2,
+        unit_price: 12.50,
+        currency_id: 'PEN'
+
+        },
+    ],
+    payment_methods: {
+        // excluded_payment_methods => excluir los metodos de pago
+        excluded_payment_methods: [{ id: "master" }, { id: "debmaster" }],
+        // excluded_payment_types => excluir los tipos de pago
+        excluded_payment_types: [{ id: "atm" }],
+        // installments =x numero maximo de cuoutas permitido en el caso que sea una tajerta de creadito
+        installments: 6
+    }
+    };
+    try {
+        const rptaMP = await preferences.create(payload);
+
+        console.log(rptaMP);
+
+        return res.json({
+            message: "Preferencia creada exitosamente",
+        });
+    } catch(e) {
+        console.log(e);
+
+        return res.json({
+            message: "Error al crear la preferencia"
+        });
+    }   
 };
