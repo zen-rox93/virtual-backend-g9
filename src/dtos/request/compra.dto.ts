@@ -3,8 +3,6 @@ import { IsArray, IsNumber, IsPositive, ValidateNested, IsUUID } from "class-val
 
 class DetalleCompraDto{
     @IsUUID("4")
-    @IsNumber()
-    @IsPositive()
     producto: number;
 
     @IsNumber()

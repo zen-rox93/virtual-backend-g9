@@ -16,7 +16,20 @@ export const crearCompra = async (req: RequestUser, res: Response)=> {
         // if (errores[0].children) {
         //   console.log(errores[0].children[0].children);
         // }
-        const mensaje_error = errores.map((error) => error.constraints);
+        const mensaje_error = errores.map((error) => error.children);
+        const mensaje_error_final = mensaje_error.map((error)=>
+            error?.map((error_hijo) => {
+                console.log(error_hijo);
+
+                return error_hijo.children 
+                    ? error_hijo.children.map(
+                        (error_hijo_hijo) => error_hijo_hijo.constraints
+                        )
+                    : null;
+            })
+        );
+               
+            
 
         return res.status(400).json({
             content: mensaje_error,
@@ -26,24 +39,31 @@ export const crearCompra = async (req: RequestUser, res: Response)=> {
 
     const trasaccion = await conexion.transaction();
     try{
+        let total = 0.0;
         const nuevaCompra = await Compras.create(
         {
             compraFecha: new Date(),
-            compraTotal: 0.0,
+            compraTotal: total,
             usuarioId: req.usuario?.getDataValue("usuarioId"),
         },
         { transaction: trasaccion }
     );
-
-        validador.detalle.map(async(detalle_compra) => {
-            const producto = await Productos.findByPk(detalle_compra.producto);
+    await Promise.all(
+        validador.detalle.map(async (detalle_compra) => {
+            const producto = await Productos.findByPk(detalle_compra.producto, {
+                attributes: ["productoCantidad", "productoPrecio"],
+            });
             if (!producto) {
                 throw new Error(`Producto ${detalle_compra.producto} no existe`);
             }
             // ahora validamos si hay la cantidad suficiente
             if(detalle_compra.cantidad > producto.getDataValue('productoCantidad')){
+                console.log('no hay cantidad');
+                
                 throw new Error(`Producto ${detalle_compra.producto} no hay suficiente cantidades`);
             };
+            
+            
             // ahora creamos el detalle de ese item
             await Detalles.create(
                 {
@@ -56,6 +76,96 @@ export const crearCompra = async (req: RequestUser, res: Response)=> {
                 },
                 {transaction : trasaccion}
             );
+                
+                
+
+            //disminuir la cantidad del item
+            // Update productos SET cantidad = cantidad -1 WHERE id = '..';
+            await Productos.update(
+                {
+                    productoCantidad:
+                        producto.getDataValue("productoCantidad") - detalle_compra.cantidad,
+                },
+                {
+                    where: {
+                        productoId: detalle_compra.producto,
+                    },
+                    transaction: trasaccion,
+                }
+            );
+           
+            total +=detalle_compra.cantidad * producto.getDataValue("productoPrecio");
+            await Compras.update(
+                {
+                    compraTotal: total,
+                },
+                {
+                    where: {
+                        compraId: nuevaCompra.getDataValue("compraId"),
+                    },
+                    transaction: trasaccion,
+                }
+            );
+            
+    }))
+/*
+        await Promise.all([validador.detalle.map(async(detalle_compra) => {
+            const producto = await Productos.findByPk(detalle_compra.producto);
+            if (!producto) {
+                throw new Error(`Producto ${detalle_compra.producto} no existe`);
+            }
+            // ahora validamos si hay la cantidad suficiente
+            if(detalle_compra.cantidad > producto.getDataValue('productoCantidad')){
+                console.log('no hay cantidad');
+                
+                throw new Error(`Producto ${detalle_compra.producto} no hay suficiente cantidades`);
+            };
+            console.log({
+                productoId: detalle_compra.producto,
+                compraId: nuevaCompra.getDataValue("compraId"),
+                detalleCantidad: detalle_compra.cantidad,
+                detalleTotal:
+                    detalle_compra.cantidad * producto.getDataValue("productoPrecio"),
+
+            });
+            
+            // ahora creamos el detalle de ese item
+            await Detalles.create(
+                {
+                    productoId: detalle_compra.producto,
+                    compraId: nuevaCompra.getDataValue("compraId"),
+                    detalleCantidad: detalle_compra.cantidad,
+                    detalleTotal:
+                        detalle_compra.cantidad * producto.getDataValue("productoPrecio"),
+
+                },
+                {transaction : trasaccion}
+            );
+                console.log(detalle_compra.cantidad);
+                
+
+            //disminuir la cantidad del item
+            // Update productos SET cantidad = cantidad -1 WHERE id = '..';
+            await Productos.update(
+                {
+                    productoCantidad:
+                        producto.getDataValue("productoCantidad") - detalle_compra.cantidad,
+                },
+                {
+                    where: {
+                        productoId: detalle_compra.producto,
+                    },
+                    transaction: trasaccion,
+                }
+            );
+            return
+                
+        })])
+*/
+        await trasaccion.commit()
+        return res.status(201).json({
+            message: "Compra realizada exitosamente",
+            content: nuevaCompra,
         });
 
     }catch(error: unknown){
