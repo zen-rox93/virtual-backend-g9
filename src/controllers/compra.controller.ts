@@ -193,7 +193,15 @@ export const crearPreferencia = async (req: Request, res:Response) => {
         'APP_USR-8208253118659647-112521-dd670f3fd6aa9147df51117701a2082e-677408439',
         integrator_id: 'dev_24c65fb163bf11ea96500242ac130004',
     });
-    const payload: CreatePreferencePayload = { payer: {
+    const payload: CreatePreferencePayload = { 
+
+        back_urls:{
+            success: 'google.com',
+            failure: 'youtube.com',
+            pending: 'gmail.com'
+        },
+        auto_return: "approved",
+        payer: {
         name: 'Lalo',
         surname: 'Landa',
         // address: {
@@ -227,10 +235,12 @@ export const crearPreferencia = async (req: Request, res:Response) => {
         // excluded_payment_methods => excluir los metodos de pago
         excluded_payment_methods: [{ id: "master" }, { id: "debmaster" }],
         // excluded_payment_types => excluir los tipos de pago
-        excluded_payment_types: [{ id: "atm" }],
+        // excluded_payment_types: [{ id: "atm" }],
         // installments =x numero maximo de cuoutas permitido en el caso que sea una tajerta de creadito
         installments: 6
-    }
+    },
+    notification_url: 
+    'https://bodega-mp-renzo.herokuapp.com/mp-notificaciones'
     };
     try {
         const rptaMP = await preferences.create(payload);
@@ -239,6 +249,7 @@ export const crearPreferencia = async (req: Request, res:Response) => {
 
         return res.json({
             message: "Preferencia creada exitosamente",
+            content: rptaMP
         });
     } catch(e) {
         console.log(e);
@@ -248,3 +259,12 @@ export const crearPreferencia = async (req: Request, res:Response) => {
         });
     }   
 };
+
+export const mpNotificaciones = (req:Request, res: Response)=>{
+    console.log("------BODY-----");
+    console.log(req.body);
+    console.log("-----QUERY PARAMS-------");
+    console.log(req.query);
+
+    return res.status(200).send("ok");
+}
