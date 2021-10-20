@@ -5,7 +5,7 @@ import { Compras, Detalles, Productos } from "../config/models";
 import { CompraDto} from "../dtos/request/compra.dto";
 import conexion from '../config/sequelize'
 import { RequestUser } from "../middlewares/validator";
-import { configure, preferences } from "mercadopago";
+import { configure, merchant_orders, payment, preferences } from "mercadopago";
 
 import { CreatePreferencePayload } from "mercadopago/models/preferences/create-payload.model";
 
@@ -260,11 +260,27 @@ export const crearPreferencia = async (req: Request, res:Response) => {
     }   
 };
 
-export const mpNotificaciones = (req:Request, res: Response)=>{
+export const mpNotificaciones =  async (req:Request, res: Response)=>{
     console.log("------BODY-----");
     console.log(req.body);
     console.log("-----QUERY PARAMS-------");
     console.log(req.query);
+    // iterar ya sea el merchant_order o el payment para:
+    //1. buscar el nodo de items
+    //2. iterar los items y buscar en la bd dichos productos para hacer su descuento (quitar el inventario)
+    //3. guardar ese merchant_order o payment en el modelo de compra (reciense genera el registro)
+    if(req.query?.topic && req.query.topic === 'merch_order') {
+        const { id } = req.query;
+        const data = await merchant_orders.findById(String(id));
+        if (data.body.order_status === 'paid'){
+            // dispararia su eveno para completar el pago
+            // 1. enviar un correo al usuario indicando que el pago se realizo exitosamente y estan preparando el producto para enviarlo
+            //2. notificar al area de despacho o alamacen apra que comience a prepara el (los) productos
+            //3. remover AHORA si el item del inventario
+
+        }
+    }
+
 
     return res.status(200).send("ok");
 }
